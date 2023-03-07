@@ -184,9 +184,6 @@ class MainFrame(customtkinter.CTkFrame):
 
         ProgressDialog(self).show(subprocess.Popen(command_name + cmd_args,
                                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE))
-        # p.wait()
-        # output, errors = p.communicate()
-        # print(output, errors)
         self.portmutex.release()
 
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None, border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent", fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None, background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None, overwrite_preferred_drawing_method: Union[str, None] = None, **kwargs):
