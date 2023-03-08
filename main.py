@@ -22,7 +22,10 @@ DEFAULT_PADDING = 5
 
 SUPPORTED_DEVICES = {'atmega32u4': ('avr109', '115200')}
 
-CWD = Path().resolve()
+if getattr(sys, 'frozen', False):
+    CWD = sys._MEIPASS
+else:
+    CWD = Path().resolve()
 
 
 class ProgressDialog(customtkinter.CTkToplevel):
@@ -49,6 +52,7 @@ class ProgressDialog(customtkinter.CTkToplevel):
         self.programmer_run = True
         self.var = customtkinter.StringVar()
         self.wm_title(APPLICATION_NAME + ': Programming in Progress...')
+        self.iconbitmap(Path(str(CWD) + "/icons/avr-flash.ico"))
 
         self.text = customtkinter.CTkTextbox(self)
         x, y, cx, cy = parent.bbox("insert")
@@ -100,12 +104,8 @@ class FileSelection(customtkinter.CTkFrame):
             self, textvariable=selection)
         self.file_select_entry.grid(row=1, column=0,
                                     sticky='ew', padx=DEFAULT_PADDING, pady=DEFAULT_PADDING)
-        if getattr(sys, 'frozen', False):
-            edit_image = customtkinter.CTkImage(dark_image=Image.open(Path(
-                sys._MEIPASS + "/icons/edit-pencil.png")))
-        else:
-            edit_image = customtkinter.CTkImage(dark_image=Image.open(
-                Path(str(CWD) + "/icons/edit-pencil.png")))
+        edit_image = customtkinter.CTkImage(dark_image=Image.open(
+            Path(str(CWD) + "/icons/edit-pencil.png")))
         file_select_button = customtkinter.CTkButton(
             self, image=edit_image, text=None, command=self.choose_file)
         file_select_button.grid(
@@ -253,10 +253,7 @@ class MainWindow(customtkinter.CTk):
         super().__init__(fg_color, **kwargs)
         customtkinter.set_appearance_mode("dark")
         self.wm_title(APPLICATION_NAME)
-        if getattr(sys, 'frozen', False):
-            self.iconbitmap(Path(sys._MEIPASS + "/icons/avr-flash.ico"))
-        else:
-            self.iconbitmap(Path(str(CWD) + "/icons/avr-flash.ico"))
+        self.iconbitmap(Path(str(CWD) + "/icons/avr-flash.ico"))
 
         main_frame = MainFrame(self)
         main_frame.pack(fill=customtkinter.BOTH, expand=True)
