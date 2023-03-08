@@ -4,6 +4,7 @@ import subprocess
 import serial.tools.list_ports
 import logging
 import threading
+import sys
 
 from time import sleep
 from os import name as OSNAME
@@ -99,9 +100,12 @@ class FileSelection(customtkinter.CTkFrame):
             self, textvariable=selection)
         self.file_select_entry.grid(row=1, column=0,
                                     sticky='ew', padx=DEFAULT_PADDING, pady=DEFAULT_PADDING)
-
-        edit_image = customtkinter.CTkImage(
-            dark_image=Image.open(Path(str(CWD) + "/edit_icon_dark.png")), light_image=Image.open(Path(str(CWD) + "/edit_icon_dark.png")))
+        if getattr(sys, 'frozen', False):
+            edit_image = customtkinter.CTkImage(dark_image=Image.open(Path(
+                sys._MEIPASS + "/icons/edit-pencil.png")))
+        else:
+            edit_image = customtkinter.CTkImage(dark_image=Image.open(
+                Path(str(CWD) + "/icons/edit-pencil.png")))
         file_select_button = customtkinter.CTkButton(
             self, image=edit_image, text=None, command=self.choose_file)
         file_select_button.grid(
@@ -186,9 +190,10 @@ class MainFrame(customtkinter.CTkFrame):
 
         cmd = command_name + cmd_args
         logging.info(str(cmd))
-
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         ProgressDialog(self).show(subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE))
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=si))
         self.portmutex.release()
 
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None, border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent", fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None, background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None, overwrite_preferred_drawing_method: Union[str, None] = None, **kwargs):
@@ -248,7 +253,11 @@ class MainWindow(customtkinter.CTk):
         super().__init__(fg_color, **kwargs)
         customtkinter.set_appearance_mode("dark")
         self.wm_title(APPLICATION_NAME)
-        # self.geometry('400x600')
+        if getattr(sys, 'frozen', False):
+            self.iconbitmap(Path(sys._MEIPASS + "/icons/avr-flash.ico"))
+        else:
+            self.iconbitmap(Path(str(CWD) + "/icons/avr-flash.ico"))
+
         main_frame = MainFrame(self)
         main_frame.pack(fill=customtkinter.BOTH, expand=True)
 
