@@ -27,6 +27,11 @@ if getattr(sys, 'frozen', False):
 else:
     CWD = Path().resolve()
 
+if OSNAME == 'nt':
+    APPLICATION_ICON = Path(str(CWD) + "/icons/avr-flash.ico")
+elif OSNAME == 'posix':
+    APPLICATION_ICON = '@' + str(Path(str(CWD) + "/icons/avr-flash.xbm").resolve())
+
 
 class ProgressDialog(customtkinter.CTkToplevel):
     def update_text_task(self, process: subprocess.Popen):
@@ -52,7 +57,7 @@ class ProgressDialog(customtkinter.CTkToplevel):
         self.programmer_run = True
         self.var = customtkinter.StringVar()
         self.wm_title(APPLICATION_NAME + ': Programming in Progress...')
-        self.iconbitmap(Path(str(CWD) + "/icons/avr-flash.ico"))
+        self.wm_iconbitmap(APPLICATION_ICON)
 
         self.text = customtkinter.CTkTextbox(self)
         x, y, cx, cy = parent.bbox("insert")
@@ -253,7 +258,7 @@ class MainWindow(customtkinter.CTk):
         super().__init__(fg_color, **kwargs)
         customtkinter.set_appearance_mode("dark")
         self.wm_title(APPLICATION_NAME)
-        self.iconbitmap(Path(str(CWD) + "/icons/avr-flash.ico"))
+        self.wm_iconbitmap(APPLICATION_ICON)
 
         main_frame = MainFrame(self)
         main_frame.pack(fill=customtkinter.BOTH, expand=True)
