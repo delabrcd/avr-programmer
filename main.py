@@ -63,13 +63,15 @@ class ProgressDialog(customtkinter.CTkToplevel):
                                 padx=DEFAULT_PADDING, pady=DEFAULT_PADDING)
 
     def show(self, process: subprocess.Popen):
+        logging.info("the commandline is {}".format(process.args))
         self.grab_set()
         t = threading.Thread(target=self.update_text_task,
                              args=[process], daemon=True)
         t.start()
         self.wait_window()
         if process.poll() is None:
-            logging.info("Window Closed before programming was finished, terminating")
+            logging.info(
+                "Window Closed before programming was finished, terminating")
             process.kill()
         return
 
@@ -147,6 +149,7 @@ class MainFrame(customtkinter.CTkFrame):
 
                 if self.selected_serial_device.get() not in self.ports:
                     self.selected_serial_device.set("None")
+                    self.eval_flash()
 
                 self.serial_device_dropdown.dropdown.configure(
                     values=self.ports)
@@ -169,8 +172,8 @@ class MainFrame(customtkinter.CTkFrame):
         self.portmutex.acquire()
         command_name = []
         if OSNAME == 'nt':
-            command_name = [str(Path(str(CWD) + '/avrdude/avrdude.exe')),
-                            '-c' + str(Path(str(CWD) + '/avrdude/avrdude.exe'))]
+            command_name = [str(Path(str(CWD) + '/avrdude/avrdude')),
+                            '-C' + str(Path(str(CWD) + '/avrdude/avrdude.conf'))]
         elif OSNAME == 'posix':
             command_name = ['avrdude']
         else:
@@ -179,11 +182,13 @@ class MainFrame(customtkinter.CTkFrame):
             return
 
         cmd_args = ['-p' + self.device_type.get(), '-c' + SUPPORTED_DEVICES[self.device_type.get()][0],
-                    '-P' + self.selected_serial_device.get(), '-b' + SUPPORTED_DEVICES[self.device_type.get()][1], '-D', '-Uflash:w:' + self.selected_file.get()]
-        logging.info(str(command_name + cmd_args))
+                    '-P' + self.selected_serial_device.get(), '-b' + SUPPORTED_DEVICES[self.device_type.get()][1], '-D', '-Uflash:w:' + self.selected_file.get()+':a']
 
-        ProgressDialog(self).show(subprocess.Popen(command_name + cmd_args,
-                                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE))
+        cmd = command_name + cmd_args
+        logging.info(str(cmd))
+
+        ProgressDialog(self).show(subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE))
         self.portmutex.release()
 
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None, border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent", fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None, background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None, overwrite_preferred_drawing_method: Union[str, None] = None, **kwargs):
