@@ -14,8 +14,8 @@ from pathlib import Path
 from PIL import Image
 
 from tooltip import CreateToolTip
-
-APPLICATION_NAME = "AVR Programmer"
+APPLICATION_VERSION = "0.2"
+APPLICATION_NAME = "AVR Programmer " + APPLICATION_VERSION
 AUTHOR = "Caleb DeLaBruere"
 
 DEFAULT_PADDING = 5
@@ -191,14 +191,18 @@ class MainFrame(customtkinter.CTkFrame):
             return
 
         cmd_args = ['-p' + self.device_type.get(), '-c' + SUPPORTED_DEVICES[self.device_type.get()][0],
-                    '-P' + self.selected_serial_device.get(), '-b' + SUPPORTED_DEVICES[self.device_type.get()][1], '-D', '-Uflash:w:' + self.selected_file.get()+':a']
+                    '-P' + self.selected_serial_device.get(), '-b' + SUPPORTED_DEVICES[self.device_type.get()][1], '-D', '-Uflash:w:' + self.selected_file.get()+':i']
 
         cmd = command_name + cmd_args
         logging.info(str(cmd))
-        si = subprocess.STARTUPINFO()
-        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        ProgressDialog(self).show(subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=si))
+        if OSNAME == 'nt':
+            si = subprocess.STARTUPINFO()
+            si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            ProgressDialog(self).show(subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=si))
+        else: 
+            ProgressDialog(self).show(subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE))
         self.portmutex.release()
 
     def __init__(self, master: any, width: int = 200, height: int = 200, corner_radius: Optional[Union[int, str]] = None, border_width: Optional[Union[int, str]] = None, bg_color: Union[str, Tuple[str, str]] = "transparent", fg_color: Optional[Union[str, Tuple[str, str]]] = None, border_color: Optional[Union[str, Tuple[str, str]]] = None, background_corner_colors: Union[Tuple[Union[str, Tuple[str, str]]], None] = None, overwrite_preferred_drawing_method: Union[str, None] = None, **kwargs):
